@@ -1,0 +1,23 @@
+.part-title{
+    background-color:rgb(198, 198, 198);
+    font-size: larger;
+}
+
+.list-title{
+    background-color: rgb(138, 209, 32);
+    font-size: larger;
+}
+
+.list-title2{
+    background-color: rgb(255, 208, 138);
+    font-size: larger;
+}
+
+body {
+  text-align: center;
+}
+
+table {
+    width: 60%;
+    margin: 0 auto;
+}
