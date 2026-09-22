@@ -7,33 +7,102 @@
     <title>家乡介绍：广东（前端第一次作业）</title>
 </head>
 <body>
-    <div class="page-head">
+    <div class="page-head" style="overflow:hidden;">
         <h1><br>家乡介绍：广东（前端第一次作业）<br><br></h1>
     </div>
     
-    <p>简介：广东省位于中国南部，地处珠江三角洲地区，是中国经济最发达的省份之一。<br>
+    <p data-reveal>简介：广东省位于中国南部，地处珠江三角洲地区，是中国经济最发达的省份之一。<br>
         广东以其丰富的文化、历史和美食而闻名。<br>
         这里有许多著名的城市，如广州、深圳和珠海，每个城市都有其独特的魅力。
         （但是广东还有许多不为人知的小秘密哦）
     </p>
     
-    点击了解:<br>
+    <div data-reveal="left" style="max-width:1060px;margin:26px auto 10px;text-align:left;">点击了解:</div>
     <table>
         <tr>
-            <th class="part-title"><a href="1.climate.html">气候环境</a></th>
-            <th class="part-title"><a href="2.interest.html">名胜景点</a></th>
-            <th class="part-title"><a href="3.food.html">美食文化</a></th>
-            <th class="part-title"><a href="4.economic.html">经济发展</a></th>
-            <th class="part-title"><a href="5.exceptional.html">奇妙特色</a></th>
+            <th class="part-title" data-reveal="zoom" style="--reveal-delay:0ms"><a href="1.climate.html">气候环境</a></th>
+            <th class="part-title" data-reveal="zoom" style="--reveal-delay:110ms"><a href="2.interest.html">名胜景点</a></th>
+            <th class="part-title" data-reveal="zoom" style="--reveal-delay:220ms"><a href="3.food.html">美食文化</a></th>
+            <th class="part-title" data-reveal="zoom" style="--reveal-delay:330ms"><a href="4.economic.html">经济发展</a></th>
+            <th class="part-title" data-reveal="zoom" style="--reveal-delay:440ms"><a href="5.exceptional.html">奇妙特色</a></th>
         </tr>
     </table>
-    <br><h2>宣传图：</h2><br>
-    <img src="photo/chick-map.jpg" alt="广东省地图" width="300">
-    <img src="photo/dumplings.jpg" alt="肠粉" width="300">
-    <img src="photo/生态区位图.jpg" alt="生态区位图" width="300">
-    <br>
-    <img src="photo/OIP-C.webp" alt="广州白云国际机场" width="300">
-    <img src="photo/cookroach.jpg" alt="小精灵" width="300">
-    <img src="photo/awa.png" alt="小精灵" width="300">
+    <h2 data-reveal="left">宣传图：</h2>
+    
+    <div class="media page-media" data-reveal>
+        <img data-reveal="zoom" style="--reveal-delay:0ms" src="photo/chick-map.jpg" alt="广东省地图" width="300">
+        <img data-reveal="zoom" style="--reveal-delay:90ms" src="photo/dumplings.jpg" alt="肠粉" width="300">
+        <img data-reveal="zoom" style="--reveal-delay:180ms" src="photo/生态区位图.jpg" alt="生态区位图" width="300">
+        <img data-reveal="zoom" style="--reveal-delay:0ms" src="photo/OIP-C.webp" alt="广州白云国际机场" width="300">
+        <img data-reveal="zoom" style="--reveal-delay:90ms" src="photo/cookroach.jpg" alt="小精灵" width="300">
+        <img data-reveal="zoom" style="--reveal-delay:180ms" src="photo/awa.png" alt="小精灵" width="300">
+    </div>
+
+    <script>
+    (function () {
+        var d = document.documentElement;
+        d.classList.add('js-ready');
+
+        function setup() {
+            var items = Array.prototype.slice.call(document.querySelectorAll('[data-reveal]'));
+
+            if (!('IntersectionObserver' in window)) {
+                items.forEach(function (el) { el.classList.add('is-in'); });
+                return;
+            }
+
+            var io = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-in');
+                        io.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.08, rootMargin: '0px 0px -8% 0px' });
+
+            items.forEach(function (el) { io.observe(el); });
+        }
+
+        // 顶部阅读进度条
+        function progress() {
+            var bar = document.createElement('div');
+            bar.className = 'read-progress';
+            bar.setAttribute('aria-hidden', 'true');
+            document.body.appendChild(bar);
+
+            var ticking = false;
+
+            function update() {
+                ticking = false;
+                var doc = document.documentElement;
+                var max = doc.scrollHeight - window.innerHeight;
+                var p = max > 0 ? Math.min(1, Math.max(0, window.pageYOffset / max)) : 0;
+                bar.style.setProperty('--p', p.toFixed(4));
+            }
+
+            function onScroll() {
+                if (!ticking) {
+                    ticking = true;
+                    window.requestAnimationFrame(update);
+                }
+            }
+
+            window.addEventListener('scroll', onScroll, { passive: true });
+            window.addEventListener('resize', onScroll);
+            update();
+        }
+
+        function boot() {
+            setup();
+            progress();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', boot);
+        } else {
+            boot();
+        }
+    })();
+    </script>
 </body>
 </html>

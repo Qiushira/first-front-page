@@ -1,29 +1,1070 @@
-.part-title{
-    background-color:rgb(198, 198, 198);
-    font-size: larger;
+@charset "UTF-8";
+
+/* ==========================================================================
+   家乡介绍：广东 · 视觉与动效层
+   --------------------------------------------------------------------------
+   本文件只负责“表现层”：配色、排版、布局、过渡与动画。
+   页面中的全部文字信息、图片与视频资源均未做任何改动。
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. 设计变量
+   -------------------------------------------------------------------------- */
+:root {
+    /* 主色调：岭南青绿 + 木棉暖橙 */
+    --jade-900: #06413a;
+    --jade-800: #0a5b50;
+    --jade-600: #0f7a6b;
+    --jade-300: #4fd1bb;
+    --coral-700: #b3452b;
+    --coral-600: #d9542f;
+    --coral-400: #f4784a;
+    --amber-400: #f7b733;
+    --gold-400: #e9c46a;
+
+    /* 中性色：正文统一用一个偏墨绿的深色，避免有的段落灰、有的段落黑 */
+    --ink: #0d2630;
+    --ink-body: #14313d;
+    --ink-soft: #35525d;
+    --ink-muted: #5f7883;
+    --line: rgba(255, 255, 255, .58);
+    --line-strong: rgba(255, 255, 255, .78);
+
+    /* ---- 液态玻璃（Liquid Glass）参数 ----------------------------------
+       玻璃 = 半透明底色 + 背景模糊与饱和 + 1px 亮边框 + 内高光 + 外投影
+       --glass-*   玻璃底色（越白越亮，透明度越低越“实”）
+       --glass-blur 背景模糊半径；--glass-sat 背景饱和度
+       --edge-*    边缘高光，模拟玻璃厚度对光线的折射
+       -------------------------------------------------------------------- */
+    --glass: rgba(255, 255, 255, .48);
+    --glass-strong: rgba(255, 255, 255, .66);
+    --glass-soft: rgba(255, 255, 255, .30);
+    --glass-tint: rgba(255, 255, 255, .16);
+    --glass-blur: 22px;
+    --glass-sat: 185%;
+    --edge-hi: inset 0 1px 0 rgba(255, 255, 255, .85);
+    --edge-lo: inset 0 -1px 0 rgba(255, 255, 255, .30);
+    --edge-ring: inset 0 0 0 1px rgba(255, 255, 255, .34);
+
+    /* 兼容旧变量名（页面里多处引用，统一指向玻璃色） */
+    --surface: rgba(255, 255, 255, .55);
+    --surface-2: rgba(255, 255, 255, .40);
+    --surface-3: rgba(255, 255, 255, .62);
+
+    /* 页面底色：给玻璃提供可折射的内容，玻璃才有“厚度感” */
+    --page-bg: #eef5f4;
+
+    /* 阴影：玻璃用双层阴影（贴身的接触阴影 + 大范围扩散阴影）才显得悬浮 */
+    --shadow-xs: 0 1px 2px rgba(8, 48, 44, .07);
+    --shadow-sm: 0 2px 8px rgba(8, 48, 44, .07), 0 10px 26px rgba(8, 48, 44, .08);
+    --shadow-md: 0 4px 14px rgba(8, 48, 44, .09), 0 20px 46px rgba(8, 48, 44, .13);
+    --shadow-lg: 0 8px 26px rgba(8, 48, 44, .12), 0 36px 80px rgba(8, 48, 44, .18);
+    --glow-jade: 0 10px 30px rgba(15, 122, 107, .30);
+    --glow-coral: 0 10px 30px rgba(217, 84, 47, .28);
+
+    /* 圆角：玻璃要更圆润才像水滴 */
+    --r-xs: 10px;
+    --r-sm: 14px;
+    --r-md: 22px;
+    --r-lg: 30px;
+    --r-xl: 40px;
+
+    /* 动效曲线与时长 */
+    --ease-out: cubic-bezier(.22, .8, .28, 1);
+    --ease-soft: cubic-bezier(.4, 0, .2, 1);
+    --ease-spring: cubic-bezier(.34, 1.4, .5, 1);
+    --ease-fluid: cubic-bezier(.32, .72, 0, 1);
+    --t-fast: .18s;
+    --t-base: .35s;
+    --t-slow: .7s;
 }
 
-.list-title{
-    background-color: rgb(138, 209, 32);
-    font-size: larger;
+/* --------------------------------------------------------------------------
+   2. 基础与排版
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
 }
 
-.list-title2{
-    background-color: rgb(255, 208, 138);
-    font-size: larger;
-}
-
-.page-head{
-    background-image:url(photo/main/bridge1.jpg);
-    color:aliceblue;
-    border-radius: 12px;
+html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
 }
 
 body {
-  text-align: center;
+    margin: 0;
+    padding: 0 0 80px;
+    /* 全文统一居中（标题、正文、列表、卡片文字都继承这一条） */
+    text-align: center;
+    font-family: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei",
+        "Hiragino Sans GB", "Source Han Sans SC", "Noto Sans SC",
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: clamp(15px, 1.02vw, 17px);
+    line-height: 1.85;
+    color: var(--ink-body);
+    background-color: var(--page-bg);
+    /* 背景光斑：给玻璃提供“可被折射的内容”。玻璃之所以像玻璃，
+       靠的就是身后有颜色和明暗变化，纯白底上的玻璃是看不出来的 */
+    background-image:
+        radial-gradient(46% 38% at 14% 6%, rgba(79, 209, 187, .42), transparent 62%),
+        radial-gradient(40% 34% at 88% 2%, rgba(233, 196, 106, .40), transparent 60%),
+        radial-gradient(52% 44% at 78% 62%, rgba(15, 122, 107, .22), transparent 66%),
+        radial-gradient(44% 40% at 8% 92%, rgba(217, 84, 47, .20), transparent 64%),
+        linear-gradient(168deg, #f3faf9 0%, #e9f3f2 45%, #f6f1ea 100%);
+    background-attachment: fixed, fixed, fixed, fixed, fixed;
+    background-size: 150% 150%, 140% 140%, 160% 160%, 150% 150%, 100% 100%;
+    background-repeat: no-repeat;
+    overflow-x: hidden;
+    animation: page-in .8s var(--ease-out) both, bg-drift 34s var(--ease-soft) infinite alternate;
 }
 
+/* 背景光斑缓慢游动：玻璃后的景物在动，玻璃的通透感才活起来 */
+@keyframes bg-drift {
+    from { background-position: 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0 0; }
+    to   { background-position: 6% 4%, 94% 6%, 92% 94%, 6% 92%, 0 0; }
+}
+
+@keyframes page-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* 正文容器：把直接子元素收在中轴线上。
+   注意 1：这里不要写 text-align，否则 :not() 的高优先级会压过标题与卡片的对齐设置，
+           统一交给 body 的 text-align: center 继承。
+   注意 2：必须排除 video —— 视频是 <body> 的直接子元素，
+           一旦被这条规则命中就会被强制拉宽到 1060px（width 属性失效、画面变形）。 */
+body > *:not(.page-head):not(.read-progress):not(script):not(video) {
+    width: min(1060px, calc(100% - 40px));
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* 段落：统一颜色与居中（不在这里写 text-align，避免重复且便于统一调整） */
+p {
+    margin: 0 auto 1.05em;
+    color: var(--ink-body);
+    line-height: 1.95;
+}
+
+/* 行内跳转链接 */
+a {
+    color: var(--jade-600);
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(15, 122, 107, .30);
+    transition: color var(--t-fast) var(--ease-soft),
+        border-color var(--t-fast) var(--ease-soft);
+}
+
+a:hover {
+    color: var(--coral-600);
+    border-bottom-color: var(--coral-400);
+}
+
+a:focus-visible {
+    outline: 2px solid var(--jade-300);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+/* 标题 */
+h1, h2, h3, h4 {
+    line-height: 1.35;
+    margin: 0 0 .6em;
+    text-wrap: balance;
+    text-align: center;
+}
+
+/* 章节标题：文字居中，装饰与下划线贴合标题本身
+   用 display:table 才能让块级标题收缩到文字宽度（width:fit-content 对 h2 不生效） */
+h2 {
+    position: relative;
+    display: table;
+    max-width: 100%;
+    margin: 54px auto 26px;
+    padding: 0 4px 15px;
+    font-size: clamp(1.35rem, 2.5vw, 1.9rem);
+    font-weight: 800;
+    letter-spacing: .02em;
+    color: var(--jade-900);
+    text-align: center;
+    border-bottom: 2px solid var(--line);
+}
+
+/* 标题上方的渐变小条，居中放在标题正上方 */
+h2::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: -12px;
+    width: 46px;
+    height: 5px;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--jade-300), var(--jade-600) 55%, var(--coral-600));
+    box-shadow: 0 4px 12px rgba(15, 122, 107, .30);
+    animation: bar-breathe 4.5s var(--ease-soft) infinite;
+}
+
+/* 下划线从中间向两侧展开 */
+h2::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -2px;
+    width: min(240px, 70%);
+    height: 2px;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--jade-600), var(--coral-600), var(--amber-400));
+    transform: translateX(-50%) scaleX(0);
+    transform-origin: center;
+    animation: rule-grow 1.1s var(--ease-out) .25s both;
+}
+
+@keyframes bar-breathe {
+    0%, 100% { transform: translateX(-50%) scaleY(1); opacity: 1; }
+    50%      { transform: translateX(-50%) scaleY(.72); opacity: .85; }
+}
+
+@keyframes rule-grow {
+    from { transform: translateX(-50%) scaleX(0); }
+    to   { transform: translateX(-50%) scaleX(1); }
+}
+
+/* 带内联配色的 h3 小徽标：做成一颗玻璃药丸 */
+h3 {
+    margin: 34px auto 18px;
+    font-size: clamp(1.02rem, 1.5vw, 1.18rem);
+    font-weight: 700;
+    text-align: center;
+}
+
+h3 > div {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    padding: 10px 26px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .74);
+    box-shadow: var(--shadow-sm), var(--edge-hi), var(--edge-ring);
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, .48), rgba(255, 255, 255, 0) 60%);
+    backdrop-filter: blur(16px) saturate(190%);
+    -webkit-backdrop-filter: blur(16px) saturate(190%);
+    transition: transform var(--t-base) var(--ease-spring),
+        box-shadow var(--t-base) var(--ease-soft);
+}
+
+h3 > div:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: var(--shadow-md), var(--edge-hi), var(--edge-ring);
+}
+
+hr {
+    width: min(1060px, calc(100% - 40px));
+    height: 1px;
+    margin: 46px auto;
+    border: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .85) 18%, rgba(255, 255, 255, .85) 82%, transparent);
+}
+
+/* --------------------------------------------------------------------------
+   3. 顶部横幅（page-head）—— 主要玻璃面板
+   -------------------------------------------------------------------------- */
+.page-head {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 240px;
+    width: min(1240px, calc(100% - 28px));
+    margin: 14px auto 8px;
+    padding: 58px 24px;
+    border-radius: var(--r-xl);
+    background-image: linear-gradient(115deg, rgba(6, 65, 58, .72), rgba(15, 122, 107, .52) 46%, rgba(217, 84, 47, .50)), url(photo/main/bridge1.jpg);
+    background-size: cover, cover;
+    background-position: center, center 42%;
+    background-repeat: no-repeat, no-repeat;
+    /* 玻璃三件套：外投影让它浮起来，内侧高光模拟玻璃厚度，1px 亮边勾出轮廓 */
+    border: 1px solid rgba(255, 255, 255, .38);
+    box-shadow:
+        var(--shadow-lg),
+        inset 0 1px 0 rgba(255, 255, 255, .55),
+        inset 0 -18px 40px rgba(255, 255, 255, .10);
+    backdrop-filter: blur(14px) saturate(150%);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+    animation: hero-zoom 1.6s var(--ease-out) both;
+    transition: transform var(--t-slow) var(--ease-fluid),
+        box-shadow var(--t-slow) var(--ease-soft);
+}
+
+/* 悬停：玻璃微微抬起并加大扩散阴影，像被指尖托起 */
+.page-head:hover {
+    transform: translateY(-4px);
+    box-shadow:
+        var(--shadow-lg),
+        0 46px 100px rgba(8, 48, 44, .20),
+        inset 0 1px 0 rgba(255, 255, 255, .68);
+}
+
+@keyframes hero-zoom {
+    from { background-size: cover, 112%; opacity: .4; }
+    to   { background-size: cover, 100%; opacity: 1; }
+}
+
+/* 缓慢流动的高光 + 一道斜向流动的高光带（液态感的关键） */
+.page-head::before,
+.page-head::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.page-head::before {
+    inset: -30% -10%;
+    background: radial-gradient(40% 62% at 20% 38%, rgba(255, 255, 255, .34), transparent 64%);
+    animation: hero-breathe 9s var(--ease-soft) infinite alternate;
+}
+
+.page-head::after {
+    inset: -20% -40%;
+    background: linear-gradient(102deg,
+            transparent 38%,
+            rgba(255, 255, 255, .10) 45%,
+            rgba(255, 255, 255, .38) 50%,
+            rgba(255, 255, 255, .10) 55%,
+            transparent 62%);
+    transform: translateX(-60%);
+    animation: liquid-sheen 7.5s var(--ease-fluid) infinite;
+}
+
+/* 高光带缓慢从左扫到右，中途停一下，像液体表面被光扫过 */
+@keyframes liquid-sheen {
+    0%        { transform: translateX(-70%); opacity: 0; }
+    12%       { opacity: 1; }
+    55%       { transform: translateX(70%); opacity: 0; }
+    100%      { transform: translateX(70%); opacity: 0; }
+}
+
+@keyframes hero-breathe {
+    from { opacity: .45; transform: scale(.94); }
+    to   { opacity: 1; transform: scale(1.08); }
+}
+
+.page-head > a {
+    position: relative;
+    z-index: 1;
+    max-width: 100%;
+    border: 0;
+    color: inherit;
+}
+
+.page-head h1 {
+    margin: 0;
+    font-size: clamp(1.05rem, 2.9vw, 2.5rem);
+    font-weight: 800;
+    letter-spacing: .04em;
+    color: #f4fffd;
+    text-shadow: 0 4px 22px rgba(0, 0, 0, .42);
+    overflow-wrap: break-word;
+    transition: transform var(--t-base) var(--ease-spring), letter-spacing var(--t-base) var(--ease-soft);
+    animation: fade-up .9s var(--ease-out) .12s both;
+}
+
+.page-head a:hover h1 {
+    transform: translateY(-4px) scale(1.025);
+    letter-spacing: .07em;
+}
+
+.page-head h1::after {
+    content: "";
+    display: block;
+    width: 74px;
+    height: 4px;
+    margin: 18px auto 0;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--jade-300), var(--gold-400), var(--coral-400));
+    box-shadow: 0 0 20px rgba(255, 255, 255, .5);
+    transition: width var(--t-slow) var(--ease-out);
+}
+
+.page-head a:hover h1::after {
+    width: 150px;
+}
+
+/* --------------------------------------------------------------------------
+   4. 首页导航表（.part-title）
+   -------------------------------------------------------------------------- */
 table {
-    width: 80%;
-    margin: 0 auto;
+    width: 100%;
+    margin: 0 auto 28px;
+    border-collapse: separate;
+    border-spacing: 0;
+    text-align: center;
+    background: var(--glass);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm), var(--edge-hi);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+}
+
+/* 兼容不支持 :has() 的旧浏览器：导航卡片仍然是胶囊样式 */
+table th.part-title {
+    padding: 24px 12px;
+    font-size: clamp(.95rem, 1.3vw, 1.1rem);
+    font-weight: 700;
+    color: var(--jade-900);
+    background: var(--glass-strong);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-sm), var(--edge-hi);
+}
+
+/* 首页的导航表：卡片式、可点击、悬停抬升 */
+table:has(.part-title) {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+}
+
+table:has(.part-title) tr {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+}
+
+table:has(.part-title) th {
+    display: block;
+}
+
+/* 导航卡片：一块厚玻璃。底色很淡，主要靠模糊 + 亮边 + 内高光成形 */
+.part-title {
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+    font-size: clamp(.95rem, 1.3vw, 1.1rem);
+    background: var(--glass-strong);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-sm), var(--edge-hi), var(--edge-ring);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    transform-origin: center bottom;
+    transition: transform var(--t-base) var(--ease-spring),
+        box-shadow var(--t-base) var(--ease-soft),
+        border-color var(--t-base) var(--ease-soft),
+        background-color var(--t-base) var(--ease-soft);
+    animation: card-pop .7s var(--ease-spring) both;
+}
+
+/* 玻璃顶部的柔和高光：模拟光从上方打下来的光泽 */
+.part-title {
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 58%);
+    background-repeat: no-repeat;
+}
+
+.part-title:nth-child(1) { animation-delay: .10s; }
+.part-title:nth-child(2) { animation-delay: .18s; }
+.part-title:nth-child(3) { animation-delay: .26s; }
+.part-title:nth-child(4) { animation-delay: .34s; }
+.part-title:nth-child(5) { animation-delay: .42s; }
+
+@keyframes card-pop {
+    from { opacity: 0; transform: translateY(26px) scale(.94); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.part-title > a {
+    display: block;
+    padding: 24px 12px;
+    color: var(--jade-900);
+    font-weight: 700;
+    border: 0;
+    transition: color var(--t-base) var(--ease-soft);
+}
+
+/* 顶部彩条：玻璃边缘的一抹彩色折射 */
+.part-title::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    border-radius: 99px 99px 0 0;
+    background: linear-gradient(90deg, var(--jade-300), var(--jade-600), var(--coral-400), var(--amber-400));
+    background-size: 220% 100%;
+    animation: flow-x 6s linear infinite;
+}
+
+/* 斜向扫过的高光：悬停时玻璃被光扫过，这是“液态”的主要来源 */
+.part-title::after {
+    content: "";
+    position: absolute;
+    inset: -30% -60%;
+    z-index: 0;
+    background: linear-gradient(102deg,
+            transparent 40%,
+            rgba(255, 255, 255, .30) 47%,
+            rgba(255, 255, 255, .78) 50%,
+            rgba(255, 255, 255, .30) 53%,
+            transparent 60%);
+    transform: translateX(-80%) skewX(-6deg);
+    opacity: 0;
+    transition: transform .85s var(--ease-fluid), opacity .5s var(--ease-soft);
+    pointer-events: none;
+}
+
+@keyframes flow-x {
+    from { background-position: 0% 0; }
+    to   { background-position: 220% 0; }
+}
+
+/* 悬停时从下往上填满的渐变层 */
+.part-title > a {
+    position: relative;
+    z-index: 1;
+}
+
+/* 悬停：玻璃加厚（底色更亮、模糊更强）并明显抬起 */
+.part-title:hover,
+.part-title:focus-within {
+    transform: translateY(-10px) scale(1.04);
+    border-color: rgba(255, 255, 255, .92);
+    background: rgba(255, 255, 255, .78);
+    backdrop-filter: blur(30px) saturate(210%);
+    -webkit-backdrop-filter: blur(30px) saturate(210%);
+    box-shadow:
+        var(--shadow-md),
+        var(--glow-jade),
+        inset 0 1px 0 rgba(255, 255, 255, .95),
+        inset 0 0 0 1px rgba(255, 255, 255, .45);
+}
+
+.part-title:hover::after,
+.part-title:focus-within::after {
+    transform: translateX(80%) skewX(-6deg);
+    opacity: 1;
+}
+
+.part-title:hover > a,
+.part-title:focus-within > a {
+    color: var(--jade-900);
+}
+
+/* 小屏导航改为单列堆叠 */
+@media (max-width: 820px) {
+    table:has(.part-title) tr {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 520px) {
+    table:has(.part-title) tr {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   5. 内容表格（气候对比等）
+   -------------------------------------------------------------------------- */
+table:not(:has(.part-title)) {
+    font-size: clamp(.86rem, 1.15vw, .98rem);
+    line-height: 1.7;
+    transition: transform var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-soft);
+}
+
+table:not(:has(.part-title)):hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md), var(--edge-hi);
+}
+
+table:not(:has(.part-title)) th {
+    padding: 15px 16px;
+    color: #f4fffd;
+    font-weight: 700;
+    letter-spacing: .04em;
+    background: linear-gradient(135deg,
+            rgba(10, 91, 80, .88),
+            rgba(15, 122, 107, .78) 55%,
+            rgba(217, 84, 47, .74));
+    background-size: 180% 100%;
+    border: 0;
+    border-right: 1px solid rgba(255, 255, 255, .18);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .30);
+    text-shadow: 0 1px 6px rgba(0, 0, 0, .28);
+    animation: flow-x 9s linear infinite;
+}
+
+table:not(:has(.part-title)) th:last-child {
+    border-right: 0;
+}
+
+table:not(:has(.part-title)) td {
+    padding: 14px 16px;
+    color: var(--ink-soft);
+    border: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, .55);
+    border-right: 1px solid rgba(255, 255, 255, .45);
+    transition: background-color var(--t-fast) var(--ease-soft), color var(--t-fast) var(--ease-soft);
+}
+
+table:not(:has(.part-title)) td:first-child {
+    color: var(--ink);
+    font-weight: 600;
+    background: rgba(255, 255, 255, .46);
+}
+
+table:not(:has(.part-title)) td:last-child {
+    border-right: 0;
+}
+
+table:not(:has(.part-title)) tr:last-child td {
+    border-bottom: 0;
+}
+
+table:not(:has(.part-title)) tbody tr:hover td,
+table:not(:has(.part-title)) tr:hover td {
+    background: rgba(79, 209, 187, .22);
+    color: var(--jade-900);
+}
+
+/* --------------------------------------------------------------------------
+   6. 列表与栏目标题（.list-title / .list-title2）
+   -------------------------------------------------------------------------- */
+ul {
+    margin: 0 auto 1.4em;
+    padding: 0;
+    list-style: none;
+}
+
+/* 列表项整体居中；条目内的说明文字保持左对齐，
+   这样多行文字有统一的起始位置，比逐行居中更好读 */
+li {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto 22px;
+    text-align: left;
+    color: var(--ink-body);
+}
+
+/* 栏目标题条：一块带色玻璃。颜色保留原来绿/橙的区分，但改成半透明 + 模糊，
+   这样身后的背景会透上来，和整体玻璃语言统一 */
+li.list-title,
+li.list-title2 {
+    position: relative;
+    overflow: hidden;
+    display: table;
+    width: auto;
+    max-width: 100%;
+    margin: 0 auto 12px;
+    padding: 15px 30px 15px 24px;
+    font-size: clamp(1.02rem, 1.6vw, 1.2rem);
+    font-weight: 700;
+    line-height: 1.5;
+    text-align: center;
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-sm), var(--edge-hi), var(--edge-ring);
+    backdrop-filter: blur(16px) saturate(200%);
+    -webkit-backdrop-filter: blur(16px) saturate(200%);
+    cursor: default;
+    transition: transform var(--t-base) var(--ease-spring),
+        box-shadow var(--t-base) var(--ease-soft),
+        letter-spacing var(--t-base) var(--ease-soft),
+        filter var(--t-base) var(--ease-soft);
+}
+
+/* 空标题条（原文里有一条只有 <br> 的条目）：给个占位符，避免塌成一条细线 */
+li.list-title:empty::before,
+li.list-title2:empty::before {
+    content: "\00a0\00a0\00a0\00a0\00a0\00a0";
+}
+
+/* 条目内文字统一用正文色，不再出现“有的有颜色有的没有” */
+li p,
+li > p {
+    color: var(--ink-body);
+}
+
+/* 左侧竖向高光：模拟玻璃侧面折射出的亮边 */
+li.list-title::before,
+li.list-title2::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    border-radius: var(--r-md) 0 0 var(--r-md);
+    background: linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(255, 255, 255, .42));
+}
+
+/* 缓慢扫过的高光 */
+li.list-title::after,
+li.list-title2::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -60%;
+    width: 45%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .70), transparent);
+    transform: skewX(-18deg);
+    animation: sheen 5.5s var(--ease-soft) infinite;
+    pointer-events: none;
+}
+
+@keyframes sheen {
+    0%        { left: -60%; }
+    35%, 100% { left: 130%; }
+}
+
+.list-title {
+    color: var(--jade-900);
+    background: linear-gradient(120deg,
+            rgba(217, 242, 168, .72),
+            rgba(169, 224, 106, .62) 55%,
+            rgba(127, 208, 74, .68));
+    border: 1px solid rgba(255, 255, 255, .70);
+}
+
+.list-title2 {
+    color: #6b3b12;
+    background: linear-gradient(120deg,
+            rgba(255, 227, 189, .74),
+            rgba(255, 203, 138, .64) 55%,
+            rgba(255, 184, 92, .70));
+    border: 1px solid rgba(255, 255, 255, .74);
+}
+
+li.list-title:hover,
+li.list-title2:hover {
+    transform: translateY(-4px);
+    letter-spacing: .015em;
+    filter: saturate(1.12) brightness(1.04);
+    box-shadow: var(--shadow-md), var(--edge-hi), var(--edge-ring);
+}
+
+/* --------------------------------------------------------------------------
+   7. 图片与视频
+   -------------------------------------------------------------------------- */
+img {
+    max-width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 6px;
+    vertical-align: middle;
+    /* 图片是实心内容，不做模糊；只给玻璃感的亮边 + 投影 + 内侧顶边高光 */
+    background: rgba(255, 255, 255, .58);
+    border: 1px solid rgba(255, 255, 255, .70);
+    border-radius: var(--r-sm);
+    box-shadow: var(--shadow-sm),
+        inset 0 1px 0 rgba(255, 255, 255, .90),
+        inset 0 0 0 1px rgba(255, 255, 255, .28);
+    transition: transform .5s var(--ease-spring),
+        box-shadow .5s var(--ease-soft),
+        filter .5s var(--ease-soft);
+}
+
+/* 图片容器：把散在文字里的图片收进来，统一成规则网格，
+   解决“有的太大有的太小、有的挤在一起、有的紧跟文字不换行”的问题 */
+.media {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+    gap: 18px;
+    align-items: center;
+    justify-items: center;
+    width: 100%;
+    max-width: 940px;
+    margin: 20px auto 26px;
+}
+
+/* 只有一张图时：适度放大、居中，并保留它本来的比例（不裁切） */
+.media:has(> img:only-of-type) {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 680px;
+}
+
+.media:has(> img:only-of-type) > img {
+    aspect-ratio: auto;
+}
+
+/* 首页宣传图：固定三列 = 两行三张 */
+.page-media {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: 1000px;
+}
+
+/* 容器里所有图片统一尺寸，不再受各图 width 属性影响 */
+.media > img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    margin: 0;
+}
+
+/* 图片组后面的 <br> 交给容器负责换行，删掉多余的换行标签 */
+.media + br,
+.media:has(+ br) + br {
+    display: none;
+}
+
+/* 子项说明文字与标题条贴近，保持“一整块”的观感 */
+li > p {
+    margin-top: 0;
+    margin-bottom: 14px;
+}
+
+/* 含视频的容器不需要额外底边距（视频自带外边距） */
+li > p:has(> video) {
+    margin-bottom: 0;
+}
+
+img:hover {
+    transform: translateY(-9px) scale(1.035);
+    box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, .95);
+    filter: saturate(1.12) contrast(1.03);
+    z-index: 2;
+}
+
+/* 外层 <p> 收缩到视频的原始宽度，让视频居中且不被拉伸
+   （如果视频外面包了容器，用这条；5.exceptional.html 里视频是 body 的直接子元素，
+     所以下面 video 的规则必须能独立工作） */
+p:has(> video) {
+    width: fit-content;
+    max-width: 100%;
+    margin: 8px auto 26px;
+}
+
+video {
+    display: block;
+    /* 实测注意事项（改动前请看）：
+       1) 只给 max-width:100% —— 让 <video> 保持 width 属性给出的原始尺寸，
+          窄屏时自动等比收缩；
+       2) 千万不要加 max-height！一旦同时存在 max-width 与 max-height，
+          Chromium 会把视频盒子撑满整栏（1060px）再去卡高度，画面被压变形，
+          竖屏视频尤其明显；
+       3) 也不要写 width:100% / max-width:800px，同样会把视频放大。 */
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+    margin: 22px auto;
+    /* 注意：视频上不要加 backdrop-filter —— 它会把正在播放的画面也一起糊掉/压暗 */
+    background: rgba(255, 255, 255, .58);
+    border: 1px solid rgba(255, 255, 255, .72);
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-md), var(--edge-hi);
+    transition: transform var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-soft);
+}
+
+video:hover {
+    transform: scale(1.012);
+    box-shadow: var(--shadow-lg);
+}
+
+/* 视频行：让同一组里的视频并排放在一行；
+   一行放不下时由 flex 等比缩小，始终保持各自原始比例、不变形 */
+.video-row {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    width: min(1060px, calc(100% - 40px));
+    margin: 26px auto;
+}
+
+.video-item {
+    flex: 0 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.video-item > video {
+    margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   8. 进入视口动画（由页面底部的小脚本添加 .is-in）
+   -------------------------------------------------------------------------- */
+html.js-ready [data-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0);
+    transition: opacity .7s var(--ease-out), transform .7s var(--ease-out);
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: opacity, transform;
+}
+
+html.js-ready [data-reveal].is-in {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+}
+
+/* data-reveal="left" / "right"：左右滑入 */
+html.js-ready [data-reveal="left"] {
+    transform: translate3d(-34px, 0, 0);
+}
+
+html.js-ready [data-reveal="right"] {
+    transform: translate3d(34px, 0, 0);
+}
+
+html.js-ready [data-reveal="zoom"] {
+    transform: scale(.9);
+}
+
+/* 用于表格等“悬停自带位移”的元素：只淡入 + 轻微模糊，避免覆盖 hover 效果 */
+html.js-ready [data-reveal="fade"] {
+    transform: none;
+    filter: blur(6px);
+    transition: opacity .7s var(--ease-out), filter .7s var(--ease-out);
+    transition-delay: var(--reveal-delay, 0ms);
+}
+
+html.js-ready [data-reveal="fade"].is-in {
+    filter: blur(0);
+}
+
+html.js-ready [data-reveal].is-in {
+    transform: none;
+}
+
+@keyframes fade-up {
+    from { opacity: 0; transform: translateY(26px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --------------------------------------------------------------------------
+   9. 顶部阅读进度条
+   -------------------------------------------------------------------------- */
+.read-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    z-index: 999;
+    transform: scaleX(var(--p, 0));
+    transform-origin: 0 50%;
+    background: linear-gradient(90deg, var(--jade-300), var(--jade-600) 42%, var(--gold-400) 72%, var(--coral-600));
+    box-shadow: 0 0 14px rgba(15, 122, 107, .45);
+    transition: transform .12s linear;
+    pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   10. 响应式
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+    .page-head {
+        min-height: 200px;
+        padding: 44px 20px;
+        border-radius: 0 0 var(--r-lg) var(--r-lg);
+    }
+
+    h2 {
+        margin-top: 42px;
+    }
+
+    /* 图片容器：小屏适当缩小间距与最小列宽 */
+    .media {
+        gap: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+    }
+
+    .media > img {
+        padding: 5px;
+    }
+
+    .page-media {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    li.list-title,
+    li.list-title2 {
+        padding: 13px 20px 13px 18px;
+    }
+}
+
+@media (max-width: 700px) {
+    /* 窄屏下首页宣传图改为两列，避免三列太挤 */
+    .page-media {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* 手机屏太窄，两个视频并排会小到看不清，改为上下排列 */
+    .video-row {
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .video-item {
+        flex: 1 1 100%;
+    }
+}
+
+@media (max-width: 560px) {
+    body {
+        padding-bottom: 56px;
+    }
+
+    body > *:not(.page-head):not(.read-progress):not(script):not(video) {
+        width: calc(100% - 28px);
+    }
+
+    .page-head {
+        min-height: 168px;
+        padding: 32px 14px;
+    }
+
+    .page-head h1 {
+        font-size: 1.05rem;
+        letter-spacing: .02em;
+    }
+
+    hr {
+        width: calc(100% - 28px);
+        margin: 34px auto;
+    }
+
+    li.list-title::after,
+    li.list-title2::after {
+        animation: none;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   11. 无障碍：尊重“减弱动态效果”的系统设置
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+    }
+
+    html.js-ready [data-reveal] {
+        opacity: 1;
+        transform: none;
+    }
+
+    .read-progress {
+        transition: none;
+    }
 }
